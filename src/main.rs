@@ -343,15 +343,10 @@ fn main() {
     let mut vx: f32 = 0.0;
     let mut vy: f32 = 0.0;
 
-    let mut hor_dir: f32 = 1.0;
-    let mut ver_dir: f32 = 1.0;
-
     let mut accel: f32 = 0.5;
 
     let mut decay: f32 = 0.3;
 
-    let mut y2: usize = 2;
-    let mut x2: usize = 2;
     let mut last_frame = std::time::Instant::now();
     event_loop.run(move |event, _, control_flow| {
         println!("SMOOTH_ACCEL: {}", SMOOTH_ACCEL);
