@@ -45,17 +45,17 @@ type Color = (u8, u8, u8, u8);
 const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
 
-#[const_tweaker::tweak]
-const SMOOTH_ACCEL: f64 = 1.0;
+#[const_tweaker::tweak(min = 0.0, max = 1.0, step = 0.1)]
+const SMOOTH_ACCEL: f32 = 1.0;
 
 #[const_tweaker::tweak]
-const SMOOTH_DECAY: f64 = 1.0;
+const SMOOTH_DECAY: f32 = 1.0;
 
 #[const_tweaker::tweak]
-const GRIPPY_ACCEL: f64 = 1.0;
+const GRIPPY_ACCEL: f32 = 1.0;
 
 #[const_tweaker::tweak]
-const GRIPPY_DECAY: f64 = 1.0;
+const GRIPPY_DECAY: f32 = 1.0;
 
 pub struct Rect {
     x: usize,
@@ -354,6 +354,13 @@ fn main() {
     let mut x2: usize = 2;
     let mut last_frame = std::time::Instant::now();
     event_loop.run(move |event, _, control_flow| {
+        println!("SMOOTH_ACCEL: {}", SMOOTH_ACCEL);
+        println!("SMOOTH_DECAY: {}", SMOOTH_DECAY);
+        println!("GRIPPY_ACCEL: {}", GRIPPY_ACCEL);
+        println!("GRIPPY_DECAY: {}", GRIPPY_DECAY);
+
+        let smooth_accel = SMOOTH_ACCEL.abs();
+
         match event {
             // NewEvents: Let's start processing events.
             Event::NewEvents(_) => {
@@ -446,11 +453,11 @@ fn main() {
 
                 if now_keys[VirtualKeyCode::LShift as usize] {
                     //move to muddy ground
-                    decay = 0.5;
-                    accel = 0.2;
+                    decay = GRIPPY_DECAY.abs();
+                    accel = GRIPPY_ACCEL.abs();
                 } else {
-                    decay = 0.3;
-                    accel = 0.5;
+                    decay = SMOOTH_DECAY.abs();
+                    accel = SMOOTH_ACCEL.abs();
                 }
 
                 // Exercise for the reader: Tie y to mouse movement
@@ -464,15 +471,9 @@ fn main() {
                 x += vx;
                 y += vy;
                 if now_keys[VirtualKeyCode::Left as usize] && x > 0.0 {
-                    // if x > 0.0 && !now_keys[VirtualKeyCode::LControl as usize] {
-                    //     ax -= accel;
-                    // }
                     x = 0.0;
                     vx = 0.0;
                     ax = 0.0;
-                    // if x2 > 0 && now_keys[VirtualKeyCode::LShift as usize] {
-                    //     x2 -= accel;
-                    // }
                 }
 
                 if x > (WIDTH * 2 / 3) as f32 {
@@ -484,15 +485,9 @@ fn main() {
                 }
 
                 if now_keys[VirtualKeyCode::Up as usize] {
-                    // if y > 0.0 && !now_keys[VirtualKeyCode::LControl as usize] {
-                    //     ay -= accel;
-                    // }
                     y = 0.0;
                     vy = 0.0;
                     ay = 0.0;
-                    // if y2 > 0 && now_keys[VirtualKeyCode::LShift as usize] {
-                    //     y2 -= accel;
-                    // }
                 }
 
                 let rect = Rect::new(x as usize, y as usize, WIDTH / 3, HEIGHT / 3);
@@ -509,12 +504,6 @@ fn main() {
                 } else {
                     vy = 0.0;
                 }
-
-                // vx = min(vx - 1.0, 0.0);
-                // vy = min(vy - 1.0, 0.0);
-
-                // let rect2 = Rect::new(x2 + 10, y2, WIDTH / 2, HEIGHT / 2);
-                // outlined_rect(&mut fb2d, rect2, c);
 
                 // Now we can copy into our buffer.
                 {
@@ -590,11 +579,9 @@ fn main() {
                 let future = acquire_future
                     .then_execute(queue.clone(), command_buffer)
                     .unwrap();
-                dbg!(start.elapsed());
                 let future = future
                     .then_swapchain_present(queue.clone(), swapchain.clone(), image_num)
                     .then_signal_fence_and_flush();
-                dbg!(start.elapsed());
 
                 match future {
                     Ok(future) => {
