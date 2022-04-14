@@ -45,6 +45,18 @@ type Color = (u8, u8, u8, u8);
 const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
 
+#[const_tweaker::tweak]
+const SMOOTH_ACCEL: f64 = 1.0;
+
+#[const_tweaker::tweak]
+const SMOOTH_DECAY: f64 = 1.0;
+
+#[const_tweaker::tweak]
+const GRIPPY_ACCEL: f64 = 1.0;
+
+#[const_tweaker::tweak]
+const GRIPPY_DECAY: f64 = 1.0;
+
 pub struct Rect {
     x: usize,
     y: usize,
@@ -223,7 +235,7 @@ fn main() {
     let fs = fs::load(device.clone()).unwrap();
 
     // Here's our (2D drawing) framebuffer.
-    let mut fb2d = [(128, 64, 64, 255); WIDTH * HEIGHT];
+    let mut fb2d = vec![(128, 64, 64, 255); WIDTH * HEIGHT];
     // We'll work on it locally, and copy it to a GPU buffer every frame.
     // Then on the GPU, we'll copy it into an Image.
     let fb2d_buffer = CpuAccessibleBuffer::from_iter(
