@@ -42,6 +42,8 @@ use winit::window::{Window, WindowBuilder};
 // We'll make our Color type an RGBA8888 pixel.
 type Color = (u8, u8, u8, u8);
 
+// UI Link: http://127.0.0.1:9938/
+
 const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
 
