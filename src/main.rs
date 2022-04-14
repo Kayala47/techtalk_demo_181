@@ -46,13 +46,10 @@ const WIDTH: usize = 320;
 const HEIGHT: usize = 240;
 
 #[const_tweaker::tweak(min = 0.0, max = 1.0, step = 0.1)]
-const SMOOTH_ACCEL: f32 = 1.0;
+const ACCEL: f32 = 1.0;
 
 #[const_tweaker::tweak]
 const SMOOTH_DECAY: f32 = 1.0;
-
-#[const_tweaker::tweak]
-const GRIPPY_ACCEL: f32 = 1.0;
 
 #[const_tweaker::tweak]
 const GRIPPY_DECAY: f32 = 1.0;
@@ -114,7 +111,6 @@ fn main() {
     let mut now_keys = [false; 255];
     let mut prev_keys = now_keys.clone();
 
-    let c = (255, 0, 0, 0);
     let required_extensions = vulkano_win::required_extensions();
     let instance = Instance::new(None, Version::V1_1, &required_extensions, None).unwrap();
     let event_loop = EventLoop::new();
@@ -234,6 +230,8 @@ fn main() {
     let vs = vs::load(device.clone()).unwrap();
     let fs = fs::load(device.clone()).unwrap();
 
+    let c = (255, 0, 0, 0);
+
     // Here's our (2D drawing) framebuffer.
     let mut fb2d = vec![(128, 64, 64, 255); WIDTH * HEIGHT];
     // We'll work on it locally, and copy it to a GPU buffer every frame.
@@ -349,12 +347,9 @@ fn main() {
 
     let mut last_frame = std::time::Instant::now();
     event_loop.run(move |event, _, control_flow| {
-        println!("SMOOTH_ACCEL: {}", SMOOTH_ACCEL);
+        println!("ACCEL: {}", ACCEL);
         println!("SMOOTH_DECAY: {}", SMOOTH_DECAY);
-        println!("GRIPPY_ACCEL: {}", GRIPPY_ACCEL);
         println!("GRIPPY_DECAY: {}", GRIPPY_DECAY);
-
-        let smooth_accel = SMOOTH_ACCEL.abs();
 
         match event {
             // NewEvents: Let's start processing events.
@@ -449,17 +444,17 @@ fn main() {
                 if now_keys[VirtualKeyCode::LShift as usize] {
                     //move to muddy ground
                     decay = GRIPPY_DECAY.abs();
-                    accel = GRIPPY_ACCEL.abs();
+                    accel = ACCEL.abs();
                 } else {
                     decay = SMOOTH_DECAY.abs();
-                    accel = SMOOTH_ACCEL.abs();
+                    accel = ACCEL.abs();
                 }
 
                 // Exercise for the reader: Tie y to mouse movement
 
                 // It's debatable whether the following code should live here or in the drawing section.
                 // First clear the framebuffer...
-                clear(&mut fb2d, (128, 64, 64, 255));
+                clear(&mut fb2d, (128, 64, 64, 0));
                 // Then draw our line:
                 vx += ax;
                 vy += ay;
